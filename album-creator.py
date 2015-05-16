@@ -7,11 +7,12 @@ from PIL import Image
 
 
 ###  PARAMETERS  ####################################################################
-usageLine	= "usage: python album-creator.py FOLDER TITLE"
+usageLine	= "usage: python album-creator.py FOLDER TITLE [-web]"
 thumbDir	= "thumb"
 nonStr		= ["n","no","non"]
 thumbSize	= "250"
-mogrifyCmd	= "mogrify -thumbnail "+thumbSize+"x"+thumbSize+" "+thumbDir+"/*.*"
+webSize		= "1280"
+mogrifyCmd	= "mogrify -auto-orient -thumbnail "+thumbSize+"x"+thumbSize+" "+thumbDir+"/*.*"
 indexSkud	= "index_skud.html"
 indexFile	= "index.html"
 titleTag	= "%TITLE%"
@@ -20,13 +21,15 @@ linksTag	= "%LINKS%"
 #####################################################################################
 
 if __name__ == '__main__':
-	if len(sys.argv)<3 or len(sys.argv)>3:
+	if len(sys.argv)<3 or len(sys.argv)>4:
 		print usageLine
 		exit(1)
 	
 	folderPath = sys.argv[1]
 	title = sys.argv[2]
-	#if len(sys.argv)>2:
+	web = False
+	if len(sys.argv)>3:
+		web = sys.argv[3] == '-web'
 	
 	if not os.path.isdir(folderPath):
 		print "Error:",folderPath,"is not a folder"
@@ -45,6 +48,10 @@ if __name__ == '__main__':
 			print "Error:",f,"is not a valid image"
 			exit(4)
 	
+		## compress if flag web
+		if web:
+				os.system('mogrify -auto-orient -resize '+webSize+'x'+webSize+' '+folderPath+'/*.*')
+
 	## copy photos to the thumb dir
 	if os.path.isdir(thumbDir):
 		ri = raw_input(thumbDir+" exists and will be deleted, do you wish to continue? ")
@@ -63,7 +70,6 @@ if __name__ == '__main__':
 	
 	## build content
 	links = ""
-	#<a class="pict" rel="day2" href="pict/P5040402.JPG"><img src="thumb/P5040402.JPG" /></a>
 	for f in files:
 		picPath = "\""+folderPath	+"/"+f+"\""
 		thuPath = "\""+thumbDir		+"/"+f+"\""
